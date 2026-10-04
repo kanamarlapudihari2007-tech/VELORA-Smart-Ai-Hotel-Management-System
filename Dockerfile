@@ -25,7 +25,7 @@ LABEL description="Production deployment container for Velora AI Smart Hotel"
 RUN rm -rf /usr/local/tomcat/webapps/*
 
 # Copy built WAR file from build stage as ROOT.war or ai-smart-hotel.war
-COPY --from=build /app/target/ai-smart-hotel.war /usr/local/tomcat/webapps/ai-smart-hotel.war
+
 COPY --from=build /app/target/ai-smart-hotel.war /usr/local/tomcat/webapps/ROOT.war
 
 # Expose default HTTP port
