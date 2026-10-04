@@ -1,0 +1,47 @@
+# ==============================================================================
+# Git Ignore Rules for Velora AI Smart Hotel Management Platform
+# ==============================================================================
+
+# Maven Build Artifacts
+target/
+*.war
+*.jar
+*.class
+
+# Embedded Local Tomcat Server & Cache
+apache-tomcat-*/
+tomcat/
+temp/
+work/
+logs/
+
+# Secret & Environment Configuration Files (Never commit real API keys or DB passwords)
+.env
+*.env
+.env.*
+!.env.example
+*.secret
+credentials*.json
+secrets*.properties
+
+# IDE & Editor Files
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+*.sublime-project
+*.sublime-workspace
+
+# Operating System & Log Files
+*.log
+Thumbs.db
+.DS_Store
+Desktop.ini
+$RECYCLE.BIN/
+
+# Package manager lock/temporary files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
