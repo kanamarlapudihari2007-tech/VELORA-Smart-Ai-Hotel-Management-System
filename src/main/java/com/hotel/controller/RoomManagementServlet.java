@@ -50,6 +50,12 @@ public class RoomManagementServlet extends HttpServlet {
             handleAddRoom(request, response);
         } else if ("updateStatus".equalsIgnoreCase(action)) {
             handleUpdateStatus(request, response);
+        } else if ("blockRoom".equalsIgnoreCase(action)) {
+            handleBlockRoom(request, response);
+        } else if ("unblockRoom".equalsIgnoreCase(action)) {
+            handleUnblockRoom(request, response);
+        } else if ("deleteRoom".equalsIgnoreCase(action)) {
+            handleDeleteRoom(request, response);
         } else {
             response.sendRedirect("rooms");
         }
@@ -111,5 +117,49 @@ public class RoomManagementServlet extends HttpServlet {
             }
         }
         response.sendRedirect("rooms?msg=updated");
+    }
+
+    private void handleBlockRoom(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String roomIdStr = request.getParameter("roomId");
+        if (roomIdStr != null) {
+            try {
+                int roomId = Integer.parseInt(roomIdStr);
+                roomDAO.updateRoomStatus(roomId, "MAINTENANCE");
+            } catch (NumberFormatException ignored) {}
+        }
+        response.sendRedirect("rooms?msg=blocked");
+    }
+
+    private void handleUnblockRoom(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String roomIdStr = request.getParameter("roomId");
+        if (roomIdStr != null) {
+            try {
+                int roomId = Integer.parseInt(roomIdStr);
+                roomDAO.updateRoomStatus(roomId, "AVAILABLE");
+            } catch (NumberFormatException ignored) {}
+        }
+        response.sendRedirect("rooms?msg=unblocked");
+    }
+
+    private void handleDeleteRoom(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String roomIdStr = request.getParameter("roomId");
+        if (roomIdStr != null) {
+            try {
+                int roomId = Integer.parseInt(roomIdStr);
+                if (roomDAO.hasBookings(roomId)) {
+                    response.sendRedirect("rooms?error=has_bookings");
+                    return;
+                }
+                boolean deleted = roomDAO.deleteRoom(roomId);
+                if (deleted) {
+                    response.sendRedirect("rooms?msg=deleted");
+                    return;
+                }
+            } catch (NumberFormatException ignored) {}
+        }
+        response.sendRedirect("rooms?error=delete_failed");
     }
 }

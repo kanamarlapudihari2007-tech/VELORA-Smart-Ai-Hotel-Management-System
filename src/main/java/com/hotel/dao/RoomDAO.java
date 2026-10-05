@@ -262,4 +262,41 @@ public class RoomDAO {
             return false;
         }
     }
+
+    /**
+     * Checks if a room has any existing booking records to maintain relational integrity.
+     */
+    public boolean hasBookings(int roomId) {
+        String sql = "SELECT COUNT(*) FROM bookings WHERE room_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, roomId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking room bookings: " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * Safely deletes a room from inventory only if it has zero associated booking records.
+     */
+    public boolean deleteRoom(int roomId) {
+        if (hasBookings(roomId)) {
+            return false;
+        }
+        String sql = "DELETE FROM rooms WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, roomId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error deleting room: " + e.getMessage());
+            return false;
+        }
+    }
 }

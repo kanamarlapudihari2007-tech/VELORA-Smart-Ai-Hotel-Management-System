@@ -166,10 +166,15 @@
             </div>
         </div>
 
-        <% if ("reply_sent".equals(msg)) { %>
+        <% if ("reply_published".equals(msg) || "reply_sent".equals(msg)) { %>
             <div class="alert alert-success">
                 <span>✓</span>
                 <div>Official management reply published successfully! Verified guest has been notified.</div>
+            </div>
+        <% } else if ("invalid_reply".equals(msg) || "invalid_reply".equals(request.getParameter("error"))) { %>
+            <div class="alert alert-danger">
+                <span>⚠</span>
+                <div>Unable to publish reply. Please provide non-empty feedback.</div>
             </div>
         <% } %>
 
@@ -334,7 +339,7 @@
                                 <div style="font-weight: 700; font-size: 0.85rem; color: var(--primary); margin-bottom: var(--space-2); display: flex; align-items: center; gap: 6px;">
                                     <span>🤖</span> Google Gemini Drafted Response (Editable):
                                 </div>
-                                <form action="manager-reply-review" method="POST">
+                                <form action="manager-reviews" method="POST">
                                     <input type="hidden" name="reviewId" value="<%= r.getId() %>">
                                     <textarea name="managerReply" class="form-control" style="min-height: 85px; margin-bottom: var(--space-2);" required><%= r.getAiReplyDraft() != null ? r.getAiReplyDraft() : "" %></textarea>
                                     <button type="submit" class="btn btn-primary btn-sm">

@@ -115,6 +115,31 @@
                 <span>✓</span>
                 <div>Room housekeeping & occupancy status updated successfully!</div>
             </div>
+        <% } else if ("blocked".equals(msg)) { %>
+            <div class="alert alert-success">
+                <span>✓</span>
+                <div>Room blocked successfully (Status set to Maintenance). It is now hidden from customer bookings for today.</div>
+            </div>
+        <% } else if ("unblocked".equals(msg)) { %>
+            <div class="alert alert-success">
+                <span>✓</span>
+                <div>Room unblocked successfully! It is now live and available for customer bookings.</div>
+            </div>
+        <% } else if ("deleted".equals(msg)) { %>
+            <div class="alert alert-success">
+                <span>✓</span>
+                <div>Room permanently deleted from hotel inventory.</div>
+            </div>
+        <% } else if ("has_bookings".equals(request.getParameter("error"))) { %>
+            <div class="alert alert-danger">
+                <span>⚠</span>
+                <div>Cannot delete this room because it has existing booking records. Use "🚫 Block" instead to safely take it off the market without corrupting guest and financial history.</div>
+            </div>
+        <% } else if ("delete_failed".equals(request.getParameter("error"))) { %>
+            <div class="alert alert-danger">
+                <span>⚠</span>
+                <div>Failed to delete room due to database error.</div>
+            </div>
         <% } %>
 
         <div class="inventory-layout">
@@ -182,7 +207,8 @@
                                 <th>Category</th>
                                 <th>Base Tariff</th>
                                 <th>Current Status</th>
-                                <th style="text-align: right;">Update State</th>
+                                <th>Update State</th>
+                                <th style="text-align: right;">Quick Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -199,9 +225,13 @@
                                     <td>Floor <%= room.getFloorNumber() %></td>
                                     <td><strong style="color: #ededed;"><%= room.getTypeName() %></strong></td>
                                     <td class="mono" style="font-weight: 600;">₹<%= room.getPricePerNight() %></td>
-                                    <td><span class="badge <%= badgeClass %>"><%= room.getStatus() %></span></td>
-                                    <td style="text-align: right;">
-                                        <form action="rooms" method="POST" class="inline-status-form" style="justify-content: flex-end;">
+                                    <td>
+                                        <span class="badge <%= badgeClass %>">
+                                            <%= "MAINTENANCE".equals(room.getStatus()) ? "🚫 BLOCKED" : room.getStatus() %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <form action="rooms" method="POST" class="inline-status-form">
                                             <input type="hidden" name="action" value="updateStatus">
                                             <input type="hidden" name="roomId" value="<%= room.getId() %>">
                                             <select name="status" class="inline-select">
@@ -212,6 +242,33 @@
                                                 <option value="MAINTENANCE" <%= "MAINTENANCE".equals(room.getStatus()) ? "selected" : "" %>>MAINTENANCE</option>
                                             </select>
                                             <button type="submit" class="btn btn-secondary btn-sm">Save</button>
+                                        </form>
+                                    </td>
+                                    <td style="text-align: right; white-space: nowrap;">
+                                        <% if ("MAINTENANCE".equals(room.getStatus())) { %>
+                                            <form action="rooms" method="POST" style="display:inline; margin:0;">
+                                                <input type="hidden" name="action" value="unblockRoom">
+                                                <input type="hidden" name="roomId" value="<%= room.getId() %>">
+                                                <button type="submit" class="btn btn-primary btn-sm" title="Re-open room for customer bookings">
+                                                    ✓ Unblock
+                                                </button>
+                                            </form>
+                                        <% } else { %>
+                                            <form action="rooms" method="POST" style="display:inline; margin:0;">
+                                                <input type="hidden" name="action" value="blockRoom">
+                                                <input type="hidden" name="roomId" value="<%= room.getId() %>">
+                                                <button type="submit" class="btn btn-secondary btn-sm" style="color: #f87171; border-color: rgba(248,113,113,0.3);" onclick="return confirm('Block Room <%= room.getRoomNumber() %> from guest bookings for today?');" title="Take room off the market for today">
+                                                    🚫 Block
+                                                </button>
+                                            </form>
+                                        <% } %>
+
+                                        <form action="rooms" method="POST" style="display:inline; margin:0; margin-left: 4px;">
+                                            <input type="hidden" name="action" value="deleteRoom">
+                                            <input type="hidden" name="roomId" value="<%= room.getId() %>">
+                                            <button type="submit" class="btn btn-secondary btn-sm" style="color: #94a3b8; padding: 4px 8px;" onclick="return confirm('Delete Room <%= room.getRoomNumber() %> permanently? (Note: Rooms with existing booking records are protected and cannot be deleted)');" title="Permanently delete room">
+                                                🗑️
+                                            </button>
                                         </form>
                                     </td>
                                 </tr>

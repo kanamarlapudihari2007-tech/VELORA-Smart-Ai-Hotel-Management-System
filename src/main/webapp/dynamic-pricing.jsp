@@ -101,7 +101,7 @@
             <% } %>
         </div>
 
-        <% if ("applied_all".equals(msg)) { %>
+        <% if ("applied_all".equals(msg) || "prices_applied".equals(msg)) { %>
             <div class="alert alert-success">
                 <span>✓</span>
                 <div>All AI-recommended dynamic rates applied across hotel room inventory in real-time.</div>
@@ -110,6 +110,16 @@
             <div class="alert alert-success">
                 <span>✓</span>
                 <div>Dynamic rate successfully applied to selected room category.</div>
+            </div>
+        <% } else if ("prices_reset".equals(msg)) { %>
+            <div class="alert alert-success">
+                <span>✓</span>
+                <div>All room categories reset to baseline standard pricing.</div>
+            </div>
+        <% } else if ("simulation_updated".equals(msg)) { %>
+            <div class="alert alert-success">
+                <span>✓</span>
+                <div>Live dynamic pricing simulation refreshed with latest telemetry.</div>
             </div>
         <% } %>
 

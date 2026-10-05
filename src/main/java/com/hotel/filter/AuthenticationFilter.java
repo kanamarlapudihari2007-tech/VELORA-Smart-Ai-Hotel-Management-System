@@ -48,6 +48,7 @@ public class AuthenticationFilter implements Filter {
 
         // Role-Based Authorization Guards
         if (path.startsWith("/manager") || path.startsWith("/analytics") || path.startsWith("/dynamic-pricing") ||
+            path.startsWith("/apply-pricing") ||
             path.endsWith("manager-dashboard.jsp") || path.endsWith("analytics.jsp") ||
             path.endsWith("manager-reviews.jsp") || path.endsWith("dynamic-pricing.jsp")) {
             if (!"MANAGER".equals(role)) {

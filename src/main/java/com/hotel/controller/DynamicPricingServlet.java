@@ -19,7 +19,7 @@ import java.math.BigDecimal;
  * DynamicPricingServlet - Stage 19 AI Dynamic Room Pricing & Revenue Optimization Controller.
  * Handles /dynamic-pricing and /manager/dynamic-pricing endpoints.
  */
-@WebServlet(urlPatterns = {"/dynamic-pricing", "/manager/dynamic-pricing"})
+@WebServlet(urlPatterns = {"/dynamic-pricing", "/manager/dynamic-pricing", "/apply-pricing"})
 public class DynamicPricingServlet extends HttpServlet {
 
     private DynamicPricingService pricingService;
@@ -72,7 +72,7 @@ public class DynamicPricingServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        if ("apply".equalsIgnoreCase(action)) {
+        if ("apply".equalsIgnoreCase(action) || "apply_all".equalsIgnoreCase(action)) {
             // Apply recommended dynamic rates to MySQL room_types table
             RevenueOptimizationReport report = pricingService.generateReport(false);
             if (report != null && report.getRecommendations() != null) {
@@ -92,23 +92,40 @@ public class DynamicPricingServlet extends HttpServlet {
                 }
             }
             pricingService.generateReport(true); // refresh report with new base rates
-            response.sendRedirect("dynamic-pricing?msg=prices_applied");
+            response.sendRedirect(request.getContextPath() + "/dynamic-pricing?msg=applied_all");
+            return;
+
+        } else if ("apply_single".equalsIgnoreCase(action)) {
+            String roomTypeIdStr = request.getParameter("roomTypeId");
+            String newPriceStr = request.getParameter("newPrice");
+
+            if (roomTypeIdStr != null && newPriceStr != null) {
+                try {
+                    int roomTypeId = Integer.parseInt(roomTypeIdStr.trim());
+                    BigDecimal priceToApply = new BigDecimal(newPriceStr.trim());
+                    if (priceToApply.compareTo(BigDecimal.ZERO) > 0) {
+                        roomDAO.updateRoomTypePrice(roomTypeId, priceToApply);
+                    }
+                } catch (Exception ignored) {}
+            }
+            pricingService.generateReport(true);
+            response.sendRedirect(request.getContextPath() + "/dynamic-pricing?msg=applied_single");
             return;
 
         } else if ("reset".equalsIgnoreCase(action)) {
             // Reset to standard baseline rates
             roomDAO.resetDefaultRoomPrices();
             pricingService.generateReport(true);
-            response.sendRedirect("dynamic-pricing?msg=prices_reset");
+            response.sendRedirect(request.getContextPath() + "/dynamic-pricing?msg=prices_reset");
             return;
 
         } else if ("simulate".equalsIgnoreCase(action)) {
             // Re-run AI simulation
             pricingService.generateReport(true);
-            response.sendRedirect("dynamic-pricing?msg=simulation_updated");
+            response.sendRedirect(request.getContextPath() + "/dynamic-pricing?msg=simulation_updated");
             return;
         }
 
-        response.sendRedirect("dynamic-pricing");
+        response.sendRedirect(request.getContextPath() + "/dynamic-pricing");
     }
 }
